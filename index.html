@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang='zh-CN'>
+<head>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1' />
+  <title>HT风险预测计算器（HMCAS+DBP2+NIHSS2+AF+TBIL+DD）</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#121a2a; --muted:#9fb0cc; --text:#e7eefc;
+      --accent:#4ea1ff; --good:#2ecc71; --bad:#e74c3c; --line:rgba(255,255,255,0.08);
+    }
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans','PingFang SC','Microsoft YaHei',sans-serif;
+      background: radial-gradient(1200px 800px at 20% 0%, #122040 0%, var(--bg) 55%);
+      color:var(--text);
+    }
+    .wrap{max-width:980px;margin:0 auto;padding:24px 16px 40px;}
+    h1{font-size:22px;margin:0;}
+    .sub{color:var(--muted);font-size:13px;line-height:1.55;margin-top:8px;}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px;}
+    @media(min-width:900px){.grid{grid-template-columns:1.1fr 0.9fr;}}
+    .card{
+      background:rgba(18,26,42,0.92);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.25);
+    }
+    .card h2{margin:0 0 10px;font-size:16px;}
+    .form{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:560px){.form{grid-template-columns:1fr 1fr;}}
+    label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);}
+    input[type='number'], select{
+      width:100%;
+      padding:10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    input[type='number']:focus, select:focus{
+      border-color:rgba(78,161,255,0.6);
+      box-shadow:0 0 0 3px rgba(78,161,255,0.15);
+    }
+    .hint{font-size:12px;color:rgba(159,176,204,0.92);line-height:1.4;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+    button{
+      border:0;background:var(--accent);color:#071021;
+      padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer;
+    }
+    button.secondary{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--line);}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;
+      background:rgba(255,255,255,0.06);border:1px solid var(--line);
+      width:fit-content;font-size:13px;color:var(--muted);
+    }
+    .big{font-size:34px;font-weight:800;letter-spacing:0.2px;}
+    .risk{
+      padding:12px;border-radius:14px;border:1px solid var(--line);
+      background:rgba(255,255,255,0.04);line-height:1.5;font-size:14px;
+    }
+    .risk.good{border-color:rgba(46,204,113,0.35);background:rgba(46,204,113,0.08);}
+    .risk.bad{border-color:rgba(231,76,60,0.35);background:rgba(231,76,60,0.08);}
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;
+      font-size:12px;color:rgba(231,238,252,0.85);
+      white-space:pre-wrap;word-break:break-word;
+      background:rgba(0,0,0,0.18);padding:10px;border-radius:12px;border:1px solid var(--line);
+    }
+    .foot{margin-top:14px;font-size:12px;color:rgba(159,176,204,0.92);line-height:1.55;}
+    .warnline{color:rgba(243,156,18,0.95);}
+  </style>
+</head>
+
+<body>
+  <div class='wrap'>
+    <h1>HT风险预测计算器（6变量模型）</h1>
+    <div class='sub'>
+      变量：NIHSS2、DBP2、TBIL、DD、HMCAS、AF。阈值锁定 0.18。<br />
+      注意：TBIL、DD 的单位必须与建模时一致；DBP2 也应与建模数据的口径一致（通常 mmHg）。
+    </div>
+
+    <div class='grid'>
+      <div class='card'>
+        <h2>输入变量</h2>
+        <div class='form'>
+          <label>
+            NIHSS2
+            <input id='nihss2' type='number' step='0.1' min='0' placeholder='例如 8' />
+            <div class='hint'>数值型。与建模定义一致的 NIHSS2。</div>
+          </label>
+
+          <label>
+            DBP2（舒张压）
+            <input id='dbp2' type='number' step='0.1' min='0' placeholder='例如 80' />
+            <div class='hint'>数值型。单位与建模一致（常见为 mmHg）。</div>
+          </label>
+
+          <label>
+            TBIL（总胆红素）
+            <input id='tbil' type='number' step='0.01' min='0' placeholder='例如 12.5' />
+            <div class='hint'>数值型。单位必须与建模一致。</div>
+          </label>
+
+          <label>
+            DD（D-二聚体）
+            <input id='dd' type='number' step='0.01' min='0' placeholder='例如 0.8' />
+            <div class='hint'>数值型。单位必须与建模一致。</div>
+          </label>
+
+          <label>
+            HMCAS（是否存在）
+            <select id='hmcas'>
+              <option value='0'>0 否</option>
+              <option value='1'>1 是</option>
+            </select>
+            <div class='hint'>二分类：否=0，是=1。</div>
+          </label>
+
+          <label>
+            AF（房颤）
+            <select id='af'>
+              <option value='0'>0 否</option>
+              <option value='1'>1 是</option>
+            </select>
+            <div class='hint'>二分类：否=0，是=1。</div>
+          </label>
+        </div>
+
+        <div class='row'>
+          <button id='btnCalc'>计算风险</button>
+          <button id='btnReset' class='secondary'>清空</button>
+        </div>
+
+        <div class='foot'>
+          <div class='warnline'>提示：本工具用于辅助评估，不替代临床决策。</div>
+          验证方法见下方说明：用R按相同系数算出同一病例的概率，再和网页结果对照。
+        </div>
+      </div>
+
+      <div class='card'>
+        <h2>计算结果</h2>
+        <div class='pill'>锁定阈值：<span id='threshText'>0.18</span></div>
+
+        <div style='margin-top:10px;'>
+          <div class='hint'>预测HT概率 p</div>
+          <div class='big' id='pText'>--</div>
+          <div class='hint' id='pText2'>--</div>
+        </div>
+
+        <div class='risk' id='riskBox' style='margin-top:10px;'>
+          请先在左侧输入变量并点击计算。
+        </div>
+
+        <div class='hint' style='margin-top:10px;'>计算明细（用于复核）</div>
+        <div class='mono' id='detailText'>--</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 最新模型系数（取自 Coef 列）
+    const COEF = {
+      intercept: -7.822978568,
+      HMCAS: 1.711204912,
+      DBP2: 0.038339316,
+      NIHSS2: 0.180841205,
+      AF: 0.800291234,
+      TBIL: 0.050323467,
+      DD: 0.066058207
+    };
+
+    const THRESHOLD = 0.18;
+
+    function $(id){ return document.getElementById(id); }
+
+    function toNumber(v){
+      const x = Number(v);
+      return Number.isFinite(x) ? x : NaN;
+    }
+
+    function sigmoid(z){
+      if (z >= 0) {
+        const ez = Math.exp(-z);
+        return 1 / (1 + ez);
+      } else {
+        const ez = Math.exp(z);
+        return ez / (1 + ez);
+      }
+    }
+
+    function validate(x){
+      const errs = [];
+      if (!Number.isFinite(x.NIHSS2) || x.NIHSS2 < 0) errs.push('NIHSS2 必须为非负数');
+      if (!Number.isFinite(x.DBP2) || x.DBP2 < 0) errs.push('DBP2 必须为非负数');
+      if (!Number.isFinite(x.TBIL) || x.TBIL < 0) errs.push('TBIL 必须为非负数');
+      if (!Number.isFinite(x.DD) || x.DD < 0) errs.push('DD 必须为非负数');
+      if (!(x.HMCAS === 0 || x.HMCAS === 1)) errs.push('HMCAS 必须为0或1');
+      if (!(x.AF === 0 || x.AF === 1)) errs.push('AF 必须为0或1');
+      return errs;
+    }
+
+    function compute(){
+      const x = {
+        NIHSS2: toNumber($('nihss2').value),
+        DBP2: toNumber($('dbp2').value),
+        TBIL: toNumber($('tbil').value),
+        DD: toNumber($('dd').value),
+        HMCAS: Number($('hmcas').value),
+        AF: Number($('af').value)
+      };
+
+      const errs = validate(x);
+      if (errs.length > 0){
+        $('riskBox').className = 'risk bad';
+        $('riskBox').textContent = '输入有问题：' + errs.join('；');
+        $('pText').textContent = '--';
+        $('pText2').textContent = '--';
+        $('detailText').textContent = '--';
+        return;
+      }
+
+      const lp =
+        COEF.intercept +
+        COEF.HMCAS * x.HMCAS +
+        COEF.DBP2 * x.DBP2 +
+        COEF.NIHSS2 * x.NIHSS2 +
+        COEF.AF * x.AF +
+        COEF.TBIL * x.TBIL +
+        COEF.DD * x.DD;
+
+      const p = sigmoid(lp);
+      const isHigh = (p >= THRESHOLD);
+
+      $('pText').textContent = (p * 100).toFixed(1) + '%';
+      $('pText2').textContent = 'p = ' + p.toFixed(4) + '（0到1）';
+
+      if (isHigh){
+        $('riskBox').className = 'risk bad';
+        $('riskBox').innerHTML =
+          '<b>结果：高风险</b><br />预测概率 p ≥ 0.18。建议结合临床进一步评估与监测。';
+      } else {
+        $('riskBox').className = 'risk good';
+        $('riskBox').innerHTML =
+          '<b>结果：低风险</b><br />预测概率 p < 0.18。仍需结合临床情况综合判断。';
+      }
+
+      const detail =
+        'LP = ' + COEF.intercept.toFixed(6) +
+        ' + ' + COEF.HMCAS.toFixed(6) + '×HMCAS(' + x.HMCAS + ')' +
+        ' + ' + COEF.DBP2.toFixed(6) + '×DBP2(' + x.DBP2 + ')' +
+        ' + ' + COEF.NIHSS2.toFixed(6) + '×NIHSS2(' + x.NIHSS2 + ')' +
+        ' + ' + COEF.AF.toFixed(6) + '×AF(' + x.AF + ')' +
+        ' + ' + COEF.TBIL.toFixed(6) + '×TBIL(' + x.TBIL + ')' +
+        ' + ' + COEF.DD.toFixed(6) + '×DD(' + x.DD + ')' +
+        '\nLP = ' + lp.toFixed(6) +
+        '\np = 1 / (1 + exp(-LP)) = ' + p.toFixed(6);
+
+      $('detailText').textContent = detail;
+    }
+
+    function resetAll(){
+      $('nihss2').value = '';
+      $('dbp2').value = '';
+      $('tbil').value = '';
+      $('dd').value = '';
+      $('hmcas').value = '0';
+      $('af').value = '0';
+      $('pText').textContent = '--';
+      $('pText2').textContent = '--';
+      $('riskBox').className = 'risk';
+      $('riskBox').textContent = '请先在左侧输入变量并点击计算。';
+      $('detailText').textContent = '--';
+    }
+
+    $('threshText').textContent = THRESHOLD.toFixed(2);
+    $('btnCalc').addEventListener('click', compute);
+    $('btnReset').addEventListener('click', resetAll);
+  </script>
+</body>
+</html>
