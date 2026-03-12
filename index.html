@@ -6,13 +6,21 @@
   <title>HT风险预测计算器（HMCAS+DBP2+NIHSS2+AF+TBIL+DD）</title>
   <style>
     :root{
-      --bg:#0b1220; --card:#121a2a; --muted:#9fb0cc; --text:#e7eefc;
-      --accent:#4ea1ff; --good:#2ecc71; --bad:#e74c3c; --line:rgba(255,255,255,0.08);
+      /* 颜色方案参考你的PPT：浅色底 + 墨绿色主色 */
+      --bg:#f4f6f2;              /* 页面背景 */
+      --card:#ffffff;            /* 卡片底色 */
+      --muted:#4f6b67;           /* 次要文字 */
+      --text:#0f2f2c;            /* 主文字 */
+      --accent:#0b6b64;          /* 主强调色 */
+      --good:#0b6b64;            /* 低风险提示色 */
+      --bad:#b23b2e;             /* 高风险提示色 */
+      --warn:#b97700;            /* 提示色 */
+      --line:rgba(15,47,44,0.14);/* 分割线/边框 */
     }
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans','PingFang SC','Microsoft YaHei',sans-serif;
-      background: radial-gradient(1200px 800px at 20% 0%, #122040 0%, var(--bg) 55%);
+      background: linear-gradient(180deg, #e6f1ed 0%, var(--bg) 45%, var(--bg) 100%);
       color:var(--text);
     }
     .wrap{max-width:980px;margin:0 auto;padding:24px 16px 40px;}
@@ -21,11 +29,11 @@
     .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px;}
     @media(min-width:900px){.grid{grid-template-columns:1.1fr 0.9fr;}}
     .card{
-      background:rgba(18,26,42,0.92);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:16px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.25);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 6px 18px rgba(15,47,44,0.10);
     }
     .card h2{margin:0 0 10px;font-size:16px;}
     .form{display:grid;grid-template-columns:1fr;gap:12px;}
@@ -36,41 +44,47 @@
       padding:10px;
       border-radius:12px;
       border:1px solid var(--line);
-      background:rgba(255,255,255,0.04);
-      color:var(--text);
+      background: #ffffff;
+      color: var(--text);
       outline:none;
     }
     input[type='number']:focus, select:focus{
-      border-color:rgba(78,161,255,0.6);
-      box-shadow:0 0 0 3px rgba(78,161,255,0.15);
+      border-color: rgba(11,107,100,0.55);
+      box-shadow: 0 0 0 3px rgba(11,107,100,0.16);
     }
     .hint{font-size:12px;color:rgba(159,176,204,0.92);line-height:1.4;}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
     button{
-      border:0;background:var(--accent);color:#071021;
+      border: 0;
+      background: var(--accent);
+      color: #ffffff;
       padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer;
     }
-    button.secondary{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--line);}
+    button.secondary{background:#ffffff;color:var(--text);border:1px solid var(--line);}
     .pill{
       display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;
-      background:rgba(255,255,255,0.06);border:1px solid var(--line);
+      background: rgba(11,107,100,0.06);
+      border: 1px solid var(--line);
       width:fit-content;font-size:13px;color:var(--muted);
     }
     .big{font-size:34px;font-weight:800;letter-spacing:0.2px;}
     .risk{
       padding:12px;border-radius:14px;border:1px solid var(--line);
-      background:rgba(255,255,255,0.04);line-height:1.5;font-size:14px;
+      background:#ffffff;line-height:1.5;font-size:14px;
     }
-    .risk.good{border-color:rgba(46,204,113,0.35);background:rgba(46,204,113,0.08);}
-    .risk.bad{border-color:rgba(231,76,60,0.35);background:rgba(231,76,60,0.08);}
+    .risk.good{border-color: rgba(11,107,100,0.35);background: rgba(11,107,100,0.08);}
+    .risk.bad{border-color: rgba(178,59,46,0.35);background: rgba(178,59,46,0.08);}
     .mono{
       font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;
-      font-size:12px;color:rgba(231,238,252,0.85);
+      font-size:12px;color: rgba(15,47,44,0.90);
       white-space:pre-wrap;word-break:break-word;
-      background:rgba(0,0,0,0.18);padding:10px;border-radius:12px;border:1px solid var(--line);
+      background: #f1f5f3;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
     }
     .foot{margin-top:14px;font-size:12px;color:rgba(159,176,204,0.92);line-height:1.55;}
-    .warnline{color:rgba(243,156,18,0.95);}
+    .warnline{color: var(--warn);}
   </style>
 </head>
 
